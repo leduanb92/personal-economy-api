@@ -3,47 +3,52 @@ from django.utils import timezone
 
 
 # Create your models here.
-class Cuenta(models.Model):
-    nombre = models.CharField(max_length=100)
-    owner = models.ForeignKey('auth.User', related_name='cuentas', on_delete=models.CASCADE)
-    balance = models.IntegerField(default=0)
+class Account(models.Model):
+    name = models.CharField(max_length=100)
+    owner = models.ForeignKey('auth.User', related_name='accounts', on_delete=models.CASCADE)
+    balance = models.DecimalField(decimal_places=2, max_digits=15)
+    initial_balance = models.DecimalField(decimal_places=2, max_digits=15)
     active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
         """
         Capitalize the name before saving
         """
-        self.nombre = self.nombre.capitalize()
-        super(Cuenta, self).save(*args, **kwargs)
+        self.name = self.name.capitalize()
+        super(Account, self).save(*args, **kwargs)
 
     def __str__(self):
-        return self.nombre
+        return self.name
 
     class Meta:
-        ordering = ["nombre"]
-        # unique_together = ['nombre', 'owner']
+        ordering = ["name"]
+        # unique_together = ['name', 'owner']
 
 
-class Operacion(models.Model):
-    INGRESO = 'In'
-    GASTO = 'Ga'
-    TIPO_CHOICES = [
-        (INGRESO, 'Ingreso'),
-        (GASTO, 'Gasto'),
+class Operation(models.Model):
+    INCOME = 'In'
+    Expense = 'Exp'
+    TYPE_CHOICES = [
+        (INCOME, 'Income'),
+        (Expense, 'Expense'),
     ]
-    tipo = models.CharField(
+    type = models.CharField(
         max_length=2,
-        choices=TIPO_CHOICES,
-        default=GASTO,
+        choices=TYPE_CHOICES,
+        default=Expense,
     )
-    cuenta = models.ForeignKey(Cuenta, models.PROTECT, related_name='operaciones')
-    fecha = models.DateField(default=timezone.now)
-    monto = models.PositiveIntegerField()
-    descripcion = models.CharField(max_length=250, blank=True)
+    account = models.ForeignKey(Account, models.PROTECT, related_name='operations')
+    date = models.DateField(default=timezone.now)
+    amount = models.DecimalField(decimal_places=2, max_digits=15)
+    description = models.CharField(max_length=250, blank=True)
     active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return '%s de $%d a la cuenta %s el %s' %(self.get_tipo_display(), self.monto, self.cuenta.nombre, self.fecha)
+        return '%s of $%d in account %s on %s' %(self.get_type_display(), self.amount, self.account.name, self.date)
 
     class Meta:
-        ordering = ["-fecha"]
+        ordering = ["-date"]
