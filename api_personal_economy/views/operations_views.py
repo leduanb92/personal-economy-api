@@ -1,31 +1,8 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework import permissions
 
-from api_personal_economy.serializers import AccountSerializer, OperationSerializer
-from api_personal_economy.models import Account, Operation
-
-
-class AccountsViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows Accounts to be viewed or edited.
-    """
-    queryset = Account.objects.none()
-    serializer_class = AccountSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        return Account.objects.filter(owner=user, active=True)
-
-    def perform_create(self, serializer):
-        instance = serializer.save(owner=self.request.user)
-        instance.name = instance.name.capitalize()
-        instance.save()
-
-    def perform_destroy(self, instance: Account):
-        instance.active = False
-        instance.name += '-deleted'
-        instance.save()
+from api_personal_economy.serializers.operations import OperationSerializer
+from api_personal_economy.models import Operation, Account
 
 
 class OperationsViewSet(viewsets.ModelViewSet):
@@ -62,7 +39,6 @@ class OperationsViewSet(viewsets.ModelViewSet):
             self.update_balance(old_value.account, old_value.type, -1 * old_value.amount)
             self.update_balance(new_value['account'], new_value['type'], new_value['amount'])
 
-        print(old_value.account, '\n', new_value['account'])
         serializer.save()
 
     def update_balance(self, account: Account, op_type, amount):

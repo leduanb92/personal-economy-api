@@ -1,11 +1,11 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from api_personal_economy import views
+from api_personal_economy.views import accounts_views, operations_views
 
 router = routers.DefaultRouter()
-router.register(r'accounts', views.AccountsViewSet)
-router.register(r'operations', views.OperationsViewSet)
+router.register(r'accounts', accounts_views.AccountsViewSet)
+router.register(r'operations', operations_views.OperationsViewSet)
 router.root_view_name = 'api-pe-root'
 
 # Wire up our API using automatic URL routing.
