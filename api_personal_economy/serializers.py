@@ -39,7 +39,7 @@ class OperationSerializer(serializers.HyperlinkedModelSerializer):
         Comprobar que el amount del gasto no sea mayor que el balance de la account.
         Si se está editando la operación comprobar que el cambio en el gasto no sobrepase el balance de la account.
         """
-        if data['type'] == 'Exp':
+        if data['type'] == Operation.Expense:
             account = data['account']
             amount = data['amount']
             instance = self.instance
@@ -47,7 +47,7 @@ class OperationSerializer(serializers.HyperlinkedModelSerializer):
                 if account.balance < amount:
                     raise serializers.ValidationError(
                         "The specified account does not have enough balance to perform this expense.")
-            elif instance.type == 'Exp':  # Solo viene aqui si es una edicion y la account no cambia
+            elif instance.type == Operation.Expense:  # Solo viene aqui si es una edicion y la account no cambia
                 if amount > instance.amount:  # Si el nuevo amount es mayor que el anterior compruebo el balance.
                     difference = amount - instance.amount
                     if account.balance < difference:
