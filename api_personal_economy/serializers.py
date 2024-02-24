@@ -1,75 +1,70 @@
-import string
-
-from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from api_personal_economy.models import Cuenta, Operacion
+from api_personal_economy.models import Account, Operation
 
 
 # Serializers define the API representation.
-class CuentaSerializer(serializers.HyperlinkedModelSerializer):
+class AccountSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
-    operaciones = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    operations = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
-        model = Cuenta
-        fields = ['id', 'url', 'nombre', 'owner', 'balance', 'operaciones']
+        model = Account
+        fields = ['id', 'url', 'name', 'owner', 'initial_balance', 'balance', 'operations']
         read_only_fields = ['balance', ]
         validators = [
             UniqueTogetherValidator(
-                queryset=Cuenta.objects.filter(active=True),
-                fields=['nombre', 'owner'],
-                message='Este usuario ya posee una cuenta con este nombre'
+                queryset=Account.objects.filter(active=True),
+                fields=['name', 'owner'],
+                message='This user already has an account with this name.'
             )
         ]
 
-    def validate_nombre(self, value: str):
+    def validate_name(self, value: str):
         if value[0].isdigit():
             raise serializers.ValidationError(
-                "El nombre de la cuenta no puede comenzar con un número.")
+                "The name of the account can not start with a number.")
         return value.capitalize()
 
 
-class OperacionSerializer(serializers.HyperlinkedModelSerializer):
-    # cuenta = serializers.rela()
+class OperationSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
-        model = Operacion
-        fields = ['id', 'url', 'tipo', 'cuenta', 'fecha', 'monto', 'descripcion']
-        # depth = 1
+        model = Operation
+        fields = ['id', 'url', 'type', 'account', 'date', 'amount', 'description']
 
     def validate(self, data):
         """
-        Comprobar que el monto del gasto no sea mayor que el balance de la cuenta.
-        Si se está editando la operación comprobar que el cambio en el gasto no sobrepase el balance de la cuenta.
+        Comprobar que el amount del gasto no sea mayor que el balance de la account.
+        Si se está editando la operación comprobar que el cambio en el gasto no sobrepase el balance de la account.
         """
-        if data['tipo'] == 'Ga':
-            cuenta = data['cuenta']
-            monto = data['monto']
+        if data['type'] == 'Exp':
+            account = data['account']
+            amount = data['amount']
             instance = self.instance
-            if instance is None or (instance and instance.cuenta != cuenta):
-                if cuenta.balance < monto:
+            if instance is None or (instance and instance.account != account):
+                if account.balance < amount:
                     raise serializers.ValidationError(
-                        "La cuenta indicada no posee balance suficiente para realizar este gasto.")
-            elif instance.tipo == 'Ga':  # Solo viene aqui si es una edicion y la cuenta no cambia
-                if monto > instance.monto:  # Si el nuevo monto es mayor que el anterior compruebo el balance.
-                    diferencia = monto - instance.monto
-                    if cuenta.balance < diferencia:
+                        "The specified account does not have enough balance to perform this expense.")
+            elif instance.type == 'Exp':  # Solo viene aqui si es una edicion y la account no cambia
+                if amount > instance.amount:  # Si el nuevo amount es mayor que el anterior compruebo el balance.
+                    difference = amount - instance.amount
+                    if account.balance < difference:
                         raise serializers.ValidationError(
-                            "La cuenta indicada no posee balance suficiente para realizar este gasto.")
+                            "The specified account does not have enough balance to perform this expense.")
             else:
-                if cuenta.balance < instance.monto + monto:
+                if account.balance < instance.amount + amount:
                     raise serializers.ValidationError(
-                        "La cuenta indicada no posee balance suficiente para realizar este gasto.")
+                        "The specified account does not have enough balance to perform this expense.")
         return data
 
-    def validate_cuenta(self, value):
+    def validate_account(self, value):
         if value.owner != self.context['request'].user:
-            raise serializers.ValidationError("Usted no es propietario de la cuenta indicada.")
+            raise serializers.ValidationError("You are not the owner of this account.")
         return value
 
-    def validate_monto(self, value):
+    def validate_amount(self, value):
         if value <= 0:
-            raise serializers.ValidationError("El monto debe ser un valor positivo.")
+            raise serializers.ValidationError("The amount must be greater than 0.")
         return value
