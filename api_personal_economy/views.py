@@ -1,79 +1,73 @@
-from copy import deepcopy, copy
-
 from rest_framework import viewsets, status
 from rest_framework import permissions
 
-from api_personal_economy.serializers import CuentaSerializer, OperacionSerializer
-from api_personal_economy.models import Cuenta, Operacion
-# from api_personal_economy.permissions import IsOwner, IsOwnerOfCuenta
+from api_personal_economy.serializers import AccountSerializer, OperationSerializer
+from api_personal_economy.models import Account, Operation
 
 
-class CuentaViewSet(viewsets.ModelViewSet):
+class AccountsViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows Cuentas to be viewed or edited.
+    API endpoint that allows Accounts to be viewed or edited.
     """
-    queryset = Cuenta.objects.none()
-    serializer_class = CuentaSerializer
+    queryset = Account.objects.none()
+    serializer_class = AccountSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        return Cuenta.objects.filter(owner=user, active=True)
+        return Account.objects.filter(owner=user, active=True)
 
     def perform_create(self, serializer):
-        if serializer.is_valid():
-            # serializer.save(owner=self.request.user)
-            instance = serializer.save(owner=self.request.user)
-            instance.nombre = instance.nombre.capitalize()
-            instance.save()
+        instance = serializer.save(owner=self.request.user)
+        instance.name = instance.name.capitalize()
+        instance.save()
 
-    def perform_destroy(self, instance: Cuenta):
+    def perform_destroy(self, instance: Account):
         instance.active = False
-        instance.nombre += '-deleted'
+        instance.name += '-deleted'
         instance.save()
 
 
-class OperacionViewSet(viewsets.ModelViewSet):
+class OperationsViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows Operaciones to be viewed or edited.
+    API endpoint that allows Operations to be viewed or edited.
     """
-    queryset = Operacion.objects.none()
-    serializer_class = OperacionSerializer
+    queryset = Operation.objects.none()
+    serializer_class = OperationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        self.queryset = Operacion.objects.filter(cuenta__owner=user, active=True)
-        cuenta_id = self.request.query_params.get('cuenta_id', None)
-        if cuenta_id:
-            self.queryset = self.queryset.filter(cuenta__id=cuenta_id)
+        self.queryset = Operation.objects.filter(account__owner=user, active=True)
+        account_id = self.request.query_params.get('account_id', None)
+        if account_id:
+            self.queryset = self.queryset.filter(account__id=account_id)
         return self.queryset
 
-    def perform_create(self, serializer: OperacionSerializer):
-        if serializer.is_valid():
-            instance = serializer.save()
-            self.update_balance(instance.cuenta, instance.tipo, instance.monto)
+    def perform_create(self, serializer: OperationSerializer):
+        instance = serializer.save()
+        self.update_balance(instance.account, instance.type, instance.amount)
 
-    def perform_update(self, serializer: OperacionSerializer):
+    def perform_update(self, serializer: OperationSerializer):
         old_value = serializer.instance
         new_value = serializer.validated_data
-        if old_value.cuenta == new_value['cuenta']:
-            if old_value.tipo == new_value['tipo'] and old_value.monto != new_value['monto']:
-                diferencia = new_value['monto'] - old_value.monto
-                self.update_balance(old_value.cuenta, new_value['tipo'], diferencia)
-            elif old_value.tipo != new_value['tipo']:
-                self.update_balance(old_value.cuenta, new_value['tipo'], old_value.monto)
-                self.update_balance(old_value.cuenta, new_value['tipo'], new_value['monto'])
+        if old_value.account == new_value['account']:
+            if old_value.type == new_value['type'] and old_value.amount != new_value['amount']:
+                difference = new_value['amount'] - old_value.amount
+                self.update_balance(old_value.account, new_value['type'], difference)
+            elif old_value.type != new_value['type']:
+                self.update_balance(old_value.account, new_value['type'], old_value.amount)
+                self.update_balance(old_value.account, new_value['type'], new_value['amount'])
         else:
-            self.update_balance(old_value.cuenta, old_value.tipo, -1 * old_value.monto)
-            self.update_balance(new_value['cuenta'], new_value['tipo'], new_value['monto'])
+            self.update_balance(old_value.account, old_value.type, -1 * old_value.amount)
+            self.update_balance(new_value['account'], new_value['type'], new_value['amount'])
 
-        print(old_value.cuenta, '\n', new_value['cuenta'])
+        print(old_value.account, '\n', new_value['account'])
         serializer.save()
 
-    def update_balance(self, cuenta: Cuenta, tipo_op, monto):
-        if tipo_op == 'In':
-            cuenta.balance += monto
+    def update_balance(self, account: Account, op_type, amount):
+        if op_type == Operation.INCOME:
+            account.balance += amount
         else:
-            cuenta.balance -= monto
-        cuenta.save()
+            account.balance -= amount
+        account.save()
