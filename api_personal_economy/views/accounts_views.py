@@ -3,6 +3,7 @@ from rest_framework import permissions
 
 from api_personal_economy.serializers.accounts import AccountSerializer
 from api_personal_economy.models import Account
+from api_personal_economy.services import accounts_service
 
 
 class AccountsViewSet(viewsets.ModelViewSet):
@@ -18,11 +19,10 @@ class AccountsViewSet(viewsets.ModelViewSet):
         return Account.objects.filter(owner=user, active=True)
 
     def perform_create(self, serializer):
-        instance = serializer.save(owner=self.request.user)
-        instance.name = instance.name.capitalize()
-        instance.save()
+        accounts_service.create(serializer, self.request.user)
+
+    def perform_update(self, serializer):
+        accounts_service.update(serializer)
 
     def perform_destroy(self, instance: Account):
-        instance.active = False
-        instance.name += '-deleted'
-        instance.save()
+        accounts_service.destroy(instance)
