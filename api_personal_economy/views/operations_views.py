@@ -3,6 +3,7 @@ from rest_framework import permissions
 
 from api_personal_economy.serializers.operations import OperationSerializer
 from api_personal_economy.models import Operation, Account
+from api_personal_economy.services import operations_service
 
 
 class OperationsViewSet(viewsets.ModelViewSet):
@@ -22,28 +23,10 @@ class OperationsViewSet(viewsets.ModelViewSet):
         return self.queryset
 
     def perform_create(self, serializer: OperationSerializer):
-        instance = serializer.save()
-        self.update_balance(instance.account, instance.type, instance.amount)
+        operations_service.create(serializer)
 
     def perform_update(self, serializer: OperationSerializer):
-        old_value = serializer.instance
-        new_value = serializer.validated_data
-        if old_value.account == new_value['account']:
-            if old_value.type == new_value['type'] and old_value.amount != new_value['amount']:
-                difference = new_value['amount'] - old_value.amount
-                self.update_balance(old_value.account, new_value['type'], difference)
-            elif old_value.type != new_value['type']:
-                self.update_balance(old_value.account, new_value['type'], old_value.amount)
-                self.update_balance(old_value.account, new_value['type'], new_value['amount'])
-        else:
-            self.update_balance(old_value.account, old_value.type, -1 * old_value.amount)
-            self.update_balance(new_value['account'], new_value['type'], new_value['amount'])
+        operations_service.update(serializer)
 
-        serializer.save()
-
-    def update_balance(self, account: Account, op_type, amount):
-        if op_type == Operation.INCOME:
-            account.balance += amount
-        else:
-            account.balance -= amount
-        account.save()
+    def perform_destroy(self, instance: Operation):
+        operations_service.destroy(instance)
