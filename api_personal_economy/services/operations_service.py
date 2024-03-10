@@ -37,3 +37,10 @@ def update_balance(account: Account, op_type, amount):
     else:
         account.balance -= amount
     account.save()
+
+
+def get_operations_by_date(request, date, serializer_class=OperationSerializer):
+    operations = Operation.objects.filter(account__owner=request.user, date=date, active=True).order_by('updated_at')
+    if operations:
+        return serializer_class(operations, many=True, context={'request': request}).data
+    return []

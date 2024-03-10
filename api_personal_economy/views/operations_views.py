@@ -1,5 +1,9 @@
+from datetime import datetime
+
 from rest_framework import viewsets
 from rest_framework import permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from api_personal_economy.serializers.operations import OperationSerializer
 from api_personal_economy.models import Operation, Account
@@ -30,3 +34,12 @@ class OperationsViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance: Operation):
         operations_service.destroy(instance)
+
+    @action(methods=['get'], url_path='by-date', detail=False)
+    def by_date(self, request):
+        date = request.query_params.get('date', None)
+        if not date:
+            return Response({'error': 'You must specify a date'}, status=400)
+        date = datetime.strptime(date, '%Y-%m-%d')
+        operations = operations_service.get_operations_by_date(request, date)
+        return Response({'list': operations})

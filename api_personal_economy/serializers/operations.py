@@ -1,8 +1,11 @@
 from rest_framework import serializers
 
 from api_personal_economy.models import Operation
+from api_personal_economy.serializers.accounts import AccountMinimalOutputSerializer
+
 
 class OperationSerializer(serializers.HyperlinkedModelSerializer):
+    account = AccountMinimalOutputSerializer()
 
     class Meta:
         model = Operation
@@ -42,3 +45,11 @@ class OperationSerializer(serializers.HyperlinkedModelSerializer):
         if value <= 0:
             raise serializers.ValidationError("The amount must be greater than 0.")
         return value
+
+
+class OperationMinimalOutputSerializer(serializers.ModelSerializer):
+    account = AccountMinimalOutputSerializer()
+
+    class Meta:
+        model = Operation
+        fields = ['id', 'type', 'account', 'date', 'amount', 'description']
