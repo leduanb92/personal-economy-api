@@ -1,5 +1,7 @@
 from rest_framework import viewsets
 from rest_framework import permissions
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from api_personal_economy.serializers.accounts import AccountSerializer
 from api_personal_economy.models import Account
@@ -26,3 +28,8 @@ class AccountsViewSet(viewsets.ModelViewSet):
 
     def perform_destroy(self, instance: Account):
         accounts_service.destroy(instance)
+
+    @action(methods=['get'], url_path='get-total-balance', detail=False)
+    def get_total_balance(self, request):
+        total = accounts_service.get_total_balance(request.user)
+        return Response({'total': total})

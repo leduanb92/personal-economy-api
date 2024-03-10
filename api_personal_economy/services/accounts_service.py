@@ -1,3 +1,5 @@
+from django.db.models import Sum
+
 from api_personal_economy.models import Account
 from api_personal_economy.serializers.accounts import AccountSerializer
 
@@ -23,3 +25,11 @@ def destroy(account: Account):
     account.active = False
     account.name += '-deleted'
     account.save()
+
+
+def get_total_balance(user):
+    total = (Account.objects
+             .filter(owner=user, active=True)
+             .aggregate(total=Sum('balance'))['total'])
+
+    return total

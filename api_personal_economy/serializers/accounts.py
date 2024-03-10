@@ -24,3 +24,11 @@ class AccountSerializer(serializers.HyperlinkedModelSerializer):
         if value[0].isdigit():
             raise serializers.ValidationError("The name of the account can not start with a number.")
         return value
+
+
+class AccountMinimalOutputSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Account
+        fields = ['id', 'name', 'balance']
+        read_only_fields = ['id', 'name', 'balance']
