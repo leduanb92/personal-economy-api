@@ -141,6 +141,9 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': [
         'djangorestframework_camel_case.parser.CamelCaseJSONParser'
     ],
+    'JSON_UNDERSCOREIZE': {
+        'no_underscore_before_number': True,
+    },
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'NON_FIELD_ERRORS_KEY': 'general_errors',
