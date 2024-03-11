@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-o)nb%v%n_$1ph4b1js#%h3*o8adk5+2k531rurhyxxrtu8emn@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'outgoing-next-humpback.ngrok-free.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'outgoing-next-humpback.ngrok-free.app', 'personal-economy-api.onrender.com']
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8036',
@@ -35,7 +35,8 @@ CORS_ORIGIN_WHITELIST = (
     'http://localhost:8080',
     'http://localhost:9000',
     'http://192.168.6.14:8080',
-    'https://outgoing-next-humpback.ngrok-free.app'
+    'https://outgoing-next-humpback.ngrok-free.app',
+    'https://personal-economy-api.onrender.com'
 )
 CORS_ALLOW_CREDENTIALS = True
 
