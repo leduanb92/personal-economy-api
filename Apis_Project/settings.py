@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 from datetime import timedelta
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,10 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-o)nb%v%n_$1ph4b1js#%h3*o8adk5+2k531rurhyxxrtu8emn@'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'https://outgoing-next-humpback.ngrok-free.app',
-                 '519e-189-226-160-20.ngrok-free.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'https://outgoing-next-humpback.ngrok-free.app']
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8036',
@@ -34,8 +34,7 @@ CORS_ORIGIN_WHITELIST = (
     'http://localhost:8080',
     'http://localhost:9000',
     'http://192.168.6.14:8080',
-    'https://outgoing-next-humpback.ngrok-free.app',
-    'https://519e-189-226-160-20.ngrok-free.app'
+    'https://outgoing-next-humpback.ngrok-free.app'
 )
 CORS_ALLOW_CREDENTIALS = True
 
@@ -98,10 +97,11 @@ WSGI_APPLICATION = 'Apis_Project.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        # Replace this value with your local database's connection string.
+        default='postgres://admin:lhMkKNAHjhPhm6kc9tfDh4wGQInzFrnt@dpg-cnn73tf109ks73fvcv0g-a/personal_economy',
+        conn_max_age=600
+    )
 }
 
 # Password validation
