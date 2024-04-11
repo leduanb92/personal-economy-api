@@ -5,8 +5,8 @@ from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from api_personal_economy.serializers.operations import OperationSerializer
-from api_personal_economy.models import Operation, Account
+from api_personal_economy.serializers.operations import OperationInputSerializer, OperationMinimalOutputSerializer
+from api_personal_economy.models import Operation
 from api_personal_economy.services import operations_service
 
 
@@ -15,7 +15,7 @@ class OperationsViewSet(viewsets.ModelViewSet):
     API endpoint that allows Operations to be viewed or edited.
     """
     queryset = Operation.objects.none()
-    serializer_class = OperationSerializer
+    serializer_class = OperationMinimalOutputSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
@@ -26,10 +26,15 @@ class OperationsViewSet(viewsets.ModelViewSet):
             self.queryset = self.queryset.filter(account__id=account_id)
         return self.queryset
 
-    def perform_create(self, serializer: OperationSerializer):
+    def get_serializer_class(self):
+        if self.action in ['create', 'update']:
+            return OperationInputSerializer
+        return self.serializer_class
+
+    def perform_create(self, serializer: OperationInputSerializer):
         operations_service.create(serializer)
 
-    def perform_update(self, serializer: OperationSerializer):
+    def perform_update(self, serializer: OperationInputSerializer):
         operations_service.update(serializer)
 
     def perform_destroy(self, instance: Operation):

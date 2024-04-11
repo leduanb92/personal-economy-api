@@ -11,6 +11,21 @@ class OperationSerializer(serializers.HyperlinkedModelSerializer):
         model = Operation
         fields = ['id', 'url', 'type', 'account', 'date', 'amount', 'description']
 
+
+class OperationMinimalOutputSerializer(serializers.ModelSerializer):
+    account = AccountMinimalOutputSerializer()
+
+    class Meta:
+        model = Operation
+        fields = ['id', 'type', 'account', 'date', 'amount', 'description']
+
+
+class OperationInputSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Operation
+        fields = ['id', 'type', 'account', 'date', 'amount', 'description']
+
     def validate(self, data):
         """
         Comprobar que el amount del gasto no sea mayor que el balance de la account.
@@ -37,6 +52,7 @@ class OperationSerializer(serializers.HyperlinkedModelSerializer):
         return data
 
     def validate_account(self, value):
+        print(value)
         if value.owner != self.context['request'].user:
             raise serializers.ValidationError("You are not the owner of this account.")
         return value
@@ -45,11 +61,3 @@ class OperationSerializer(serializers.HyperlinkedModelSerializer):
         if value <= 0:
             raise serializers.ValidationError("The amount must be greater than 0.")
         return value
-
-
-class OperationMinimalOutputSerializer(serializers.ModelSerializer):
-    account = AccountMinimalOutputSerializer()
-
-    class Meta:
-        model = Operation
-        fields = ['id', 'type', 'account', 'date', 'amount', 'description']

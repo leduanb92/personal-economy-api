@@ -1,14 +1,14 @@
 from api_personal_economy.models import Operation, Account
-from api_personal_economy.serializers.operations import OperationSerializer
+from api_personal_economy.serializers.operations import OperationSerializer, OperationInputSerializer
 
 
-def create(serializer: OperationSerializer):
+def create(serializer: OperationInputSerializer):
     instance = serializer.save()
     update_balance(instance.account, instance.type, instance.amount)
     return instance
 
 
-def update(serializer):
+def update(serializer: OperationInputSerializer):
     old_value = serializer.instance
     new_value = serializer.validated_data
     if old_value.account == new_value['account']:
