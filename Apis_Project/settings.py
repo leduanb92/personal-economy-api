@@ -38,6 +38,8 @@ CORS_ORIGIN_WHITELIST = (
     'http://localhost:8081',
     'http://localhost:8080',
     'http://localhost:9000',
+    'http://localhost',
+    'capacitor://localhost',
     'http://192.168.6.14:8080',
     'https://outgoing-next-humpback.ngrok-free.app',
     'https://personal-economy-api.onrender.com',
