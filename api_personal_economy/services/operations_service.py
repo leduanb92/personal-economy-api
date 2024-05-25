@@ -31,6 +31,25 @@ def destroy(operation: Operation):
     update_balance(operation.account, operation.type, -1 * operation.amount)
 
 
+def destroy_bulk(ids: list):
+    operations_to_delete = Operation.objects.filter(pk__in=ids).select_related('account')
+    operations_to_delete.update(active=False)
+    operations_grouped = {}
+
+    for operation in operations_to_delete:
+        account_id = operation.account.id
+        if account_id not in operations_grouped:
+            operations_grouped[account_id] = {
+                "account": operation.account,
+                "amount": 0
+            }
+        operations_grouped[account_id]["amount"] += operation.amount if operation.type == Operation.Expense \
+            else -1 * operation.amount
+
+    for operation in operations_grouped.values():
+        update_balance(operation["account"], Operation.INCOME, operation["amount"])
+
+
 def update_balance(account: Account, op_type, amount):
     if op_type == Operation.INCOME:
         account.balance += amount
