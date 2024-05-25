@@ -44,7 +44,17 @@ class OperationsViewSet(viewsets.ModelViewSet):
     def by_date(self, request):
         date = request.query_params.get('date', None)
         if not date:
-            return Response({'error': 'You must specify a date'}, status=400)
+            return Response({'message': 'You must specify a date'}, status=400)
         date = datetime.strptime(date, '%Y-%m-%d')
         operations = operations_service.get_operations_by_date(request, date)
         return Response({'list': operations})
+
+    @action(methods=['post'], url_path='destroy-bulk', detail=False)
+    def destroy_bulk(self, request):
+        ids = request.data.get('ids', None)
+        if not ids:
+            return Response(status=204)
+        if type(ids) is not list:
+            return Response({'message': 'You must provide a list of operations IDs'}, status=400)
+        operations_service.destroy_bulk(ids)
+        return Response()
