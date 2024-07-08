@@ -30,7 +30,9 @@ ALLOWED_HOSTS = ['127.0.0.1',
                  'localhost',
                  'outgoing-next-humpback.ngrok-free.app',
                  'personal-economy-api.onrender.com',
-                 'personal-economy-ui.onrender.com']
+                 'personal-economy-ui.onrender.com',
+                 'personal-economy-ui.netlify.app'
+                 ]
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8036',
@@ -43,7 +45,8 @@ CORS_ORIGIN_WHITELIST = (
     'http://192.168.6.14:8080',
     'https://outgoing-next-humpback.ngrok-free.app',
     'https://personal-economy-api.onrender.com',
-    'https://personal-economy-ui.onrender.com'
+    'https://personal-economy-ui.onrender.com',
+    'https://personal-economy-ui.netlify.app'
 )
 CORS_ALLOW_CREDENTIALS = True
 
